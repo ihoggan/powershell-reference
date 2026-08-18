@@ -1,0 +1,33 @@
+name: checks
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  sheets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # pwsh is preinstalled on ubuntu-latest runners, but pin the check
+      # so a runner image change turns into a clear failure rather than a
+      # silently skipped parse stage.
+      - name: Confirm pwsh is available
+        run: pwsh -NoProfile -Command '$PSVersionTable.PSVersion.ToString()'
+
+      # Provers first. If the gates cannot detect a deliberate defect,
+      # a green run on the real sheets means nothing.
+      - name: Prove the secret scanner detects leaks
+        run: python3 tests/check_scan.py
+
+      - name: Prove the sheet gate rejects bad snippets
+        run: python3 tests/prove_sheets.py
+
+      - name: Check the sheets
+        run: python3 tools/check_sheets.py sheets --require-pwsh
