@@ -18,10 +18,11 @@ these sheets replace was written against `Get-WmiObject` and the retired
 | [Entra ID](sheets/entra-id.md) | Graph scopes, users, groups, devices, bulk lookups, the AzureAD translation table |
 | [Network discovery](sheets/network-discovery.md) | reachability, parallel sweeps, DNS, ports, MAC, remote CIM |
 | [Endpoint admin](sheets/endpoint-admin.md) | logged-on user, profiles, disks, printers, services, installs, the WMI-to-CIM table |
+| [PowerShell basics](sheets/powershell-basics.md) | pipeline and objects, types, operators, branching, loops, functions, error handling |
 
 ## What is checked
 
-Two claims are made here, and both are enforced by something runnable
+Three claims are made here, and each is enforced by something runnable
 rather than asserted:
 
 **Every snippet parses.** `tools/check_sheets.py` extracts every fenced
@@ -34,10 +35,16 @@ addresses, internal hostnames, UNC shares, AD domain components, private
 addressing and hard-coded account names. Examples use `192.0.2.0/24`
 (TEST-NET-1) and `example.com`, both reserved for documentation.
 
+**The language claims are true.** Parsing proves syntax, not behaviour --
+`Get-Nonsense -Foo bar` parses perfectly. `tests/verify_language.ps1`
+executes the behavioural claims in the basics sheet (17 of them) and
+compares each against its stated result.
+
 ```bash
-python3 tools/check_sheets.py sheets    # both stages
-python3 tests/prove_sheets.py           # proves the gate rejects things
-python3 tests/check_scan.py             # proves the scanner detects things
+python3 tools/check_sheets.py sheets --require-pwsh  # parse + leak stages
+python3 tests/prove_sheets.py                        # proves the gate rejects things
+python3 tests/check_scan.py                          # proves the scanner detects things
+pwsh -NoProfile -File tests/verify_language.ps1      # executes the claims
 ```
 
 The provers are the point. A check that has only ever passed proves
@@ -49,7 +56,10 @@ honest instead of drifting.
 Measured limits, rather than assumed ones:
 
 - The parser checks syntax, not existence. `Get-Nonsense -Foo bar` parses
-  perfectly.
+  perfectly. Behavioural claims are covered by
+  `tests/verify_language.ps1` instead, and only for the basics sheet --
+  the AD, Entra, network and endpoint sheets need a domain, a tenant or
+  a Windows host, so their cmdlets are not executed anywhere.
 - The parser does **not** see an en-dash used as a parameter prefix —
   `Get-CimInstance –ClassName x` parses clean and fails at runtime. That
   is why the gate has a second stage; the scanner catches it instead.

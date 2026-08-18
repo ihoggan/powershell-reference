@@ -31,3 +31,8 @@ jobs:
 
       - name: Check the sheets
         run: python3 tools/check_sheets.py sheets --require-pwsh
+
+      # The parser proves the snippets are syntactically valid. This
+      # proves the behaviour the prose claims around them is real.
+      - name: Verify the language claims
+        run: pwsh -NoProfile -File tests/verify_language.ps1

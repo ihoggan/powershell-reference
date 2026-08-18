@@ -166,7 +166,7 @@ def main() -> int:
         new_rules = rules_fired - baseline
         if expect_rule in new_rules:
             caught += 1
-            print(f"mutation caught    {label}  ->  {expect_rule}")
+            print(f"mutation caught    {label:<40} rule: {expect_rule}")
         else:
             failures.append(
                 f"MUTATION MISSED: {label!r} expected rule {expect_rule!r}, "

@@ -156,7 +156,7 @@ def main() -> int:
         code, out = run(CONTROL + "\n" + extra)
         if code == 1 and expect_tag in out:
             caught += 1
-            print(f"mutation rejected  {label}  ->  {expect_tag}")
+            print(f"mutation rejected  {label:<52} stage: {expect_tag}")
         else:
             failures.append(
                 f"MUTATION MISSED: {label!r} expected a {expect_tag} failure; "
